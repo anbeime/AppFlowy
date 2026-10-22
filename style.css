@@ -1,0 +1,108 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html, body {
+  height: 100%;
+  background: #1a202c;
+  font-family: system-ui, -apple-system, "Microsoft YaHei", sans-serif;
+  color: #2d3748;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+#game-root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  gap: 8px;
+}
+
+/* 横屏：宽度受高约束，整屏放下 16:9 画布；竖屏：切竖向画布（9:16）按高度撑满。
+   不卡固定像素上限，画布跟随视口，避免大屏两侧大片空白。
+   v1.11：预留 120→96（touchbar 单行 + hint 实测占用），画布更大 */
+#game-canvas {
+  width: min(98vw, calc((100svh - 96px) * 16 / 9));
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: #fffaf0;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  display: block;
+  cursor: pointer;
+  touch-action: none;          /* 触屏：不滚动、不缩放，交由指针事件处理 */
+}
+
+/* 触屏横屏（手机横过来玩）：hint 隐藏、按键紧凑、画布撑更大。
+   v1.11 修复「手机横屏画布只有 480px 宽、两侧大片空白还嫌小」 */
+@media (orientation: landscape) and (pointer: coarse) {
+  #hint { display: none; }
+  #touchbar { gap: 6px; }
+  #touchbar button { font-size: 13px; padding: 8px 6px; min-width: 56px; box-shadow: 0 2px 0 #1a365d; }
+  #game-canvas {
+    width: min(98vw, calc((100svh - 64px) * 16 / 9));
+    border-radius: 8px;
+  }
+}
+
+/* 竖屏：画布变竖向 9:16，按高度撑满（留出虚拟按键空间），游戏内部切 720×1280 满宽布局 */
+@media (orientation: portrait) {
+  #game-canvas {
+    width: min(98vw, calc((100svh - 190px) * 9 / 16));
+    max-width: 98vw;
+    aspect-ratio: 9 / 16;
+  }
+  #touchbar { gap: 6px; }
+  #touchbar button { font-size: 16px; padding: 12px 8px; }
+  #hint { font-size: 11px; }
+}
+
+/* 虚拟按键条（移动端/无键盘） */
+#touchbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: min(96vw, 1280px);
+}
+/* 桌面端默认隐藏虚拟按键；触屏环境由 LM_TOUCH.init 移除 hidden 显示 */
+#touchbar.hidden { display: none; }
+#touchbar button {
+  flex: 1 1 auto;
+  min-width: 64px;
+  max-width: 180px;
+  padding: 10px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  background: #2c5282;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 3px 0 #1a365d;
+  cursor: pointer;
+  transition: transform 0.05s ease, background 0.15s ease;
+}
+#touchbar button:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #1a365d;
+  background: #319795;
+}
+
+#hint {
+  font-size: 12px;
+  color: #cbd5e0;
+  letter-spacing: 0.2px;
+  text-align: center;
+}
+
+/* 竖屏也能直接玩（不再强制旋转遮挡）；横屏更大更清晰 */
+#rotate-hint { display: none; }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>龙虾市场 · Lobster Market</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    #intro-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,12,20,.92);z-index:999;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;}
+    .intro-card{max-width:560px;width:90%;background:#11192a;border:1px solid #2a3a55;border-radius:16px;padding:26px 30px;color:#e8eefc;box-shadow:0 20px 60px rgba(0,0,0,.5);box-sizing:border-box;}
+    .intro-card h1{margin:0 0 4px;font-size:30px;}
+    .intro-card .tag{margin:0 0 14px;color:#7fd1ff;font-size:14px;letter-spacing:.5px;}
+    .intro-card .pitch{margin:0 0 14px;font-size:16px;line-height:1.6;}
+    .intro-card .points{margin:0 0 14px;padding-left:20px;font-size:14px;line-height:1.9;}
+    .intro-card .points b{color:#ffd166;}
+    .intro-card .how{margin:0 0 20px;font-size:13px;color:#9fb3d1;background:#0c1424;padding:10px 12px;border-radius:8px;line-height:1.5;}
+    #intro-start{display:block;width:100%;padding:13px;font-size:17px;font-weight:700;color:#06121f;background:linear-gradient(135deg,#7fd1ff,#4aa3ff);border:0;border-radius:10px;cursor:pointer;}
+    #intro-fab{position:fixed;right:14px;top:14px;z-index:998;padding:8px 12px;font-size:13px;color:#cfe3ff;background:rgba(17,25,42,.85);border:1px solid #2a3a55;border-radius:20px;cursor:pointer;}
+    #stats-fab,#share-fab{position:fixed;right:14px;z-index:998;padding:9px 13px;font-size:13px;font-weight:700;color:#06121f;border:0;border-radius:20px;cursor:pointer;}
+    #stats-fab{top:62px;background:linear-gradient(135deg,#ffd166,#ffb347);}
+    #share-fab{top:108px;background:linear-gradient(135deg,#7fd1ff,#4aa3ff);}
+    #stats-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,12,20,.9);z-index:997;font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;}
+    .stats-card{max-width:460px;width:88%;background:#11192a;border:1px solid #2a3a55;border-radius:16px;padding:24px 26px;color:#e8eefc;box-shadow:0 20px 60px rgba(0,0,0,.5);box-sizing:border-box;}
+    .stats-card h2{margin:0 0 4px;font-size:24px;}
+    .stats-card .stag{margin:0 0 16px;color:#7fd1ff;font-size:13px;}
+    .stat-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #1c2740;font-size:15px;}
+    .stat-row b{color:#ffd166;font-size:18px;}
+    .stat-empty{color:#9fb3d1;text-align:center;line-height:1.7;}
+    #stats-close{display:block;width:100%;margin-top:18px;padding:12px;font-size:16px;font-weight:700;color:#06121f;background:linear-gradient(135deg,#7fd1ff,#4aa3ff);border:0;border-radius:10px;cursor:pointer;}
+  </style>
+</head>
+<body>
+  <div id="game-root">
+    <canvas id="game-canvas" width="1280" height="720"></canvas>
+    <div id="touchbar">
+      <button type="button" data-act="dex">📖 图鉴</button>
+      <button type="button" data-act="sound">🔊 音效</button>
+      <button type="button" data-act="next">➡️ 下一位</button>
+      <button type="button" data-act="fullscreen">⛶ 全屏</button>
+      <button type="button" data-act="reset">🔄 重置</button>
+    </div>
+    <div id="hint">点货架选海鲜 · 点做法出餐 · 点排队顾客优先服务 · 竖屏可玩，横屏更大更清晰</div>
+  </div>
+  <div id="rotate-hint">📱 请把手机横过来游玩</div>
+
+  <div id="intro-overlay">
+    <div class="intro-card">
+      <h1>🦞 龙虾市场</h1>
+      <p class="tag">海鲜经营玩法 × 真实营养学教育</p>
+      <p class="pitch">这不是普通小游戏——把 <b>FDA/EPA 营养科普</b> 玩进脑子。</p>
+      <ul class="points">
+        <li>🐟 15 种海鲜营养数据，按 USDA FDC + 中国食物成分表 2019 逐项核对</li>
+        <li>⚠️ 汞判定用 FDA/EPA 官方 ppm 表做成<b>硬约束</b>（卖给孕妇/儿童高汞鱼会被拒收扣声望）</li>
+        <li>📊 营养图鉴五维雷达图 + 可持续标识，边玩边学</li>
+      </ul>
+      <p class="how">玩法：点货架选海鲜 → 点做法出餐 → 服务顾客，注意高汞陷阱</p>
+      <button id="intro-start">▶ 开始游戏</button>
+    </div>
+  </div>
+
+  <div id="stats-overlay" onclick="if(event.target===this)LM_SOCIAL.closeStats()">
+    <div class="stats-card">
+      <h2>🏆 我的战绩</h2>
+      <p class="stag">本地存档 · 跨局累积，越玩越有底气</p>
+      <div id="stats-body"></div>
+      <button id="stats-close" onclick="LM_SOCIAL.closeStats()">关闭</button>
+    </div>
+  </div>
+
+    <button id="intro-fab" onclick="openSciIntro()">❓ 科普说明</button>
+    <button id="stats-fab" onclick="LM_SOCIAL.openStats()">🏆 战绩</button>
+    <button id="share-fab" onclick="LM_SOCIAL.shareResult()">📤 分享</button>
+  <script>
+    function openSciIntro(){var e=document.getElementById('intro-overlay');if(e)e.style.display='flex';}
+    function closeSciIntro(){var e=document.getElementById('intro-overlay');if(e)e.style.display='none';}
+    var sb=document.getElementById('intro-start');if(sb)sb.onclick=closeSciIntro;
+    openSciIntro();
+  </script>
+
+  <script src="js/data.js"></script>
+  <script src="js/customers.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/dex.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/touch.js"></script>
+  <script src="js/social.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
